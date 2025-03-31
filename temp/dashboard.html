@@ -295,8 +295,8 @@ async function fetchTransactions() {
                         <i class="fas fa-${t.transaction_type === 'deposit' ? 'plus-circle text-success' : 'minus-circle text-warning'}"></i>
                         ${t.transaction_type.charAt(0).toUpperCase() + t.transaction_type.slice(1)}
                     </td>
-                    <td>$${t.amount.toFixed(2)}</td>
-                    <td>$${t.balance_after.toFixed(2)}</td>
+                    <td>Rs.${t.amount.toFixed(2)}</td>
+                    <td>Rs.${t.balance_after.toFixed(2)}</td>
                     <td>${t.timestamp}</td>
                 </tr>
             `).join('');
