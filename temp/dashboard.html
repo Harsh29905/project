@@ -1,0 +1,385 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Online Banking{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sidebar {
+        min-height: calc(100vh - 56px);
+        background: #f8f9fa;
+        padding: 20px;
+        border-right: 1px solid #dee2e6;
+    }
+    
+    .sidebar .nav-link {
+        color: #333;
+        padding: 8px 16px;
+        margin: 4px 0;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .sidebar .nav-link:hover {
+        background: #e9ecef;
+    }
+    
+    .sidebar .nav-link.active {
+        background: #0d6efd;
+        color: white;
+    }
+    
+    .dashboard-section {
+        display: none;
+    }
+    
+    .dashboard-section.active {
+        display: block;
+    }
+    
+    .welcome-section {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .stats-row {
+        margin-bottom: 20px;
+    }
+    
+    .stats-card {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .balance-card {
+        background: linear-gradient(45deg, #0d6efd, #0099ff);
+        padding: 25px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+    }
+    
+    .balance-card h3, .balance-card h4, .balance-card p {
+        color: white;
+        margin: 0;
+    }
+    
+    .transaction-container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .settings-form {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="d-flex flex-column">
+                <a class="nav-link active" data-section="overview">
+                    <i class="fas fa-home"></i> Overview
+                </a>
+                <a class="nav-link" data-section="transactions">
+                    <i class="fas fa-exchange-alt"></i> Transactions
+                </a>
+                <a class="nav-link" data-section="deposit">
+                    <i class="fas fa-plus-circle"></i> Deposit
+                </a>
+                <a class="nav-link" data-section="withdraw">
+                    <i class="fas fa-minus-circle"></i> Withdraw
+                </a>
+                <a class="nav-link" data-section="settings">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 p-4">
+            <!-- Overview Section -->
+            <div id="overview" class="dashboard-section active">
+                <div class="welcome-section">
+                    <h2>Welcome to Your Dashboard</h2>
+                    <p class="lead">Manage your finances with ease and security</p>
+                </div>
+
+                <div class="balance-card">
+                    <h3>Account Information</h3>
+                    <p class="mb-2">Account ID: <span id="accountId">Loading...</span></p>
+                    <h4 class="mt-3">Current Balance: Rs.<span id="currentBalance">Loading...</span></h4>
+                </div>
+
+                <div class="row stats-row">
+                    <div class="col-md-4">
+                        <div class="stats-card">
+                            <h5>Last Transaction</h5>
+                            <p id="lastTransaction">Loading...</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stats-card">
+                            <h5>Monthly Activity</h5>
+                            <p id="monthlyActivity">Loading...</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stats-card">
+                            <h5>Account Status</h5>
+                            <p class="text-success">Active</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transactions Section -->
+            <div id="transactions" class="dashboard-section">
+                <h2 class="mb-4">Transaction History</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="transaction-list">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                        <th>Balance</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionHistory">
+                                    <tr>
+                                        <td colspan="4" class="text-center">Loading transactions...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deposit Section -->
+            <div id="deposit" class="dashboard-section">
+                <h2 class="mb-4">Make a Deposit</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <p class="card-text text-muted mb-4">Instantly deposit funds into your account</p>
+                        <form id="depositForm" onsubmit="handleDeposit(event)">
+                            <div class="mb-3">
+                                <label for="depositAmount" class="form-label">Amount to Deposit</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">Rs.</span>
+                                    <input type="number" class="form-control" id="depositAmount" min="0.01" step="0.01" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-plus-circle me-2"></i>Make Deposit
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Withdraw Section -->
+            <div id="withdraw" class="dashboard-section">
+                <h2 class="mb-4">Make a Withdrawal</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <p class="card-text text-muted mb-4">Securely withdraw funds from your account</p>
+                        <form id="withdrawForm" onsubmit="handleWithdraw(event)">
+                            <div class="mb-3">
+                                <label for="withdrawAmount" class="form-label">Amount to Withdraw</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">Rs.</span>
+                                    <input type="number" class="form-control" id="withdrawAmount" min="0.01" step="0.01" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-minus-circle me-2"></i>Make Withdrawal
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="settings" class="dashboard-section">
+                <h2 class="mb-4">Account Settings</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <form class="settings-form">
+                            <div class="mb-3">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-control" value="{{ current_user.username }}" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" value="{{ current_user.email }}" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Account ID</label>
+                                <input type="text" class="form-control" value="{{ current_user.account_id }}" readonly>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Menu Navigation
+document.addEventListener('DOMContentLoaded', () => {
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('.dashboard-section');
+
+    function showSection(sectionId) {
+        sections.forEach(section => {
+            section.classList.remove('active');
+        });
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+        });
+
+        document.getElementById(sectionId).classList.add('active');
+        document.querySelector(`[data-section="${sectionId}"]`).classList.add('active');
+    }
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            const sectionId = e.target.closest('.nav-link').dataset.section;
+            showSection(sectionId);
+        });
+    });
+
+    // Initialize data
+    fetchBalance();
+    fetchTransactions();
+});
+
+// Fetch account balance and details
+async function fetchBalance() {
+    try {
+        const response = await fetch('/api/balance');
+        const data = await response.json();
+        
+        document.getElementById('accountId').textContent = data.account_id;
+        document.getElementById('currentBalance').textContent = data.balance.toFixed(2);
+    } catch (error) {
+        console.error('Error fetching balance:', error);
+    }
+}
+
+// Fetch transaction history
+async function fetchTransactions() {
+    try {
+        const response = await fetch('/api/statement');
+        const data = await response.json();
+        
+        const tbody = document.getElementById('transactionHistory');
+        if (data.transactions.length > 0) {
+            tbody.innerHTML = data.transactions.map(t => `
+                <tr>
+                    <td>
+                        <i class="fas fa-${t.transaction_type === 'deposit' ? 'plus-circle text-success' : 'minus-circle text-warning'}"></i>
+                        ${t.transaction_type.charAt(0).toUpperCase() + t.transaction_type.slice(1)}
+                    </td>
+                    <td>$${t.amount.toFixed(2)}</td>
+                    <td>$${t.balance_after.toFixed(2)}</td>
+                    <td>${t.timestamp}</td>
+                </tr>
+            `).join('');
+            
+            // Update last transaction
+            const lastTx = data.transactions[0];
+            document.getElementById('lastTransaction').innerHTML = `
+                ${lastTx.transaction_type.charAt(0).toUpperCase() + lastTx.transaction_type.slice(1)}<br>
+                $${lastTx.amount.toFixed(2)}
+            `;
+            
+            // Update monthly activity
+            const currentMonth = new Date().getMonth();
+            const monthlyTx = data.transactions.filter(t => new Date(t.timestamp).getMonth() === currentMonth);
+            document.getElementById('monthlyActivity').textContent = `${monthlyTx.length} transactions this month`;
+        } else {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center">No transactions found</td></tr>';
+            document.getElementById('lastTransaction').textContent = 'No transactions yet';
+            document.getElementById('monthlyActivity').textContent = '0 transactions this month';
+        }
+    } catch (error) {
+        console.error('Error fetching transactions:', error);
+    }
+}
+
+// Handle deposit
+async function handleDeposit(event) {
+    event.preventDefault();
+    
+    const amount = parseFloat(document.getElementById('depositAmount').value);
+    
+    try {
+        const response = await fetch('/api/deposit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ amount })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            document.getElementById('depositAmount').value = '';
+            fetchBalance();
+            fetchTransactions();
+            alert('Deposit successful!');
+        } else {
+            alert(data.error || 'Deposit failed');
+        }
+    } catch (error) {
+        alert('An error occurred. Please try again.');
+    }
+}
+
+// Handle withdrawal
+async function handleWithdraw(event) {
+    event.preventDefault();
+    
+    const amount = parseFloat(document.getElementById('withdrawAmount').value);
+    
+    try {
+        const response = await fetch('/api/withdraw', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ amount })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            document.getElementById('withdrawAmount').value = '';
+            fetchBalance();
+            fetchTransactions();
+            alert('Withdrawal successful!');
+        } else {
+            alert(data.error || 'Withdrawal failed');
+        }
+    } catch (error) {
+        alert('An error occurred. Please try again.');
+    }
+}
+</script>
+{% endblock %} 

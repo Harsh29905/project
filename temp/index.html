@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - Online Banking{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h1 class="display-4 mb-4">Welcome to Online Banking</h1>
+            <p class="lead mb-4">Secure, fast, and convenient banking at your fingertips.</p>
+            
+            <div class="row mb-5">
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="h5">Secure</h3>
+                            <p>Your security is our top priority. All transactions are encrypted and protected.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="h5">Fast</h3>
+                            <p>Instant deposits and withdrawals. Manage your money in real-time.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="h5">Convenient</h3>
+                            <p>Bank from anywhere, anytime. No more waiting in lines.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg px-4 gap-3">Go to Dashboard</a>
+                {% else %}
+                    <a href="{{ url_for('login_page') }}" class="btn btn-primary btn-lg px-4 gap-3">Login</a>
+                    <a href="{{ url_for('register_page') }}" class="btn btn-outline-primary btn-lg px-4">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
